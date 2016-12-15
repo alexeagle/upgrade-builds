@@ -119,12 +119,12 @@ import { $$TESTABILITY, $DELEGATE, $INJECTOR, $PROVIDE, INJECTOR_KEY, UPGRADE_MO
  * [Angular 1 $injector](https://docs.angularjs.org/api/auto/service/$injector).
  *
  */
-export var UpgradeModule = (function () {
+export class UpgradeModule {
     /**
      * @param {?} injector
      * @param {?} ngZone
      */
-    function UpgradeModule(injector, ngZone) {
+    constructor(injector, ngZone) {
         this.injector = injector;
         this.ngZone = ngZone;
     }
@@ -135,26 +135,24 @@ export var UpgradeModule = (function () {
      * @param {?=} config
      * @return {?}
      */
-    UpgradeModule.prototype.bootstrap = function (element, modules, config /*angular.IAngularBootstrapConfig*/) {
-        var _this = this;
-        if (modules === void 0) { modules = []; }
+    bootstrap(element, modules = [], config /*angular.IAngularBootstrapConfig*/) {
         // Create an ng1 module to bootstrap
-        var /** @type {?} */ upgradeModule = angular
+        const /** @type {?} */ upgradeModule = angular
             .module(UPGRADE_MODULE_NAME, modules)
             .value(INJECTOR_KEY, this.injector)
             .config([
             $PROVIDE, $INJECTOR,
-            function ($provide, $injector) {
+                ($provide, $injector) => {
                 if ($injector.has($$TESTABILITY)) {
                     $provide.decorator($$TESTABILITY, [
                         $DELEGATE,
-                        function (testabilityDelegate) {
-                            var /** @type {?} */ originalWhenStable = testabilityDelegate.whenStable;
-                            var /** @type {?} */ injector = _this.injector;
+                            (testabilityDelegate) => {
+                            const /** @type {?} */ originalWhenStable = testabilityDelegate.whenStable;
+                            const /** @type {?} */ injector = this.injector;
                             // Cannot use arrow function below because we need the context
-                            var /** @type {?} */ newWhenStable = function (callback) {
+                            const /** @type {?} */ newWhenStable = function (callback) {
                                 originalWhenStable.call(this, function () {
-                                    var /** @type {?} */ ng2Testability = injector.get(Testability);
+                                    const /** @type {?} */ ng2Testability = injector.get(Testability);
                                     if (ng2Testability.isStable()) {
                                         callback.apply(this, arguments);
                                     }
@@ -172,45 +170,43 @@ export var UpgradeModule = (function () {
         ])
             .run([
             $INJECTOR,
-            function ($injector) {
-                _this.$injector = $injector;
+                ($injector) => {
+                this.$injector = $injector;
                 // Initialize the ng1 $injector provider
                 setTempInjectorRef($injector);
-                _this.injector.get($INJECTOR);
+                this.injector.get($INJECTOR);
                 // Put the injector on the DOM, so that it can be "required"
-                angular.element(element).data(controllerKey(INJECTOR_KEY), _this.injector);
+                angular.element(element).data(controllerKey(INJECTOR_KEY), this.injector);
                 // Wire up the ng1 rootScope to run a digest cycle whenever the zone settles
-                var /** @type {?} */ $rootScope = $injector.get('$rootScope');
-                _this.ngZone.onMicrotaskEmpty.subscribe(function () { return _this.ngZone.runOutsideAngular(function () { return $rootScope.$evalAsync(); }); });
+                const /** @type {?} */ $rootScope = $injector.get('$rootScope');
+                this.ngZone.onMicrotaskEmpty.subscribe(() => this.ngZone.runOutsideAngular(() => $rootScope.$evalAsync()));
             }
         ]);
         // Make sure resumeBootstrap() only exists if the current bootstrap is deferred
-        var /** @type {?} */ windowAngular = ((window) /** TODO #???? */)['angular'];
+        const /** @type {?} */ windowAngular = ((window) /** TODO #???? */)['angular'];
         windowAngular.resumeBootstrap = undefined;
         // Bootstrap the angular 1 application inside our zone
-        this.ngZone.run(function () { angular.bootstrap(element, [upgradeModule.name], config); });
+        this.ngZone.run(() => { angular.bootstrap(element, [upgradeModule.name], config); });
         // Patch resumeBootstrap() to run inside the ngZone
         if (windowAngular.resumeBootstrap) {
-            var /** @type {?} */ originalResumeBootstrap_1 = windowAngular.resumeBootstrap;
-            var /** @type {?} */ ngZone_1 = this.ngZone;
+            const /** @type {?} */ originalResumeBootstrap = windowAngular.resumeBootstrap;
+            const /** @type {?} */ ngZone = this.ngZone;
             windowAngular.resumeBootstrap = function () {
-                var _this = this;
-                var /** @type {?} */ args = arguments;
-                windowAngular.resumeBootstrap = originalResumeBootstrap_1;
-                ngZone_1.run(function () { windowAngular.resumeBootstrap.apply(_this, args); });
+                let /** @type {?} */ args = arguments;
+                windowAngular.resumeBootstrap = originalResumeBootstrap;
+                ngZone.run(() => { windowAngular.resumeBootstrap.apply(this, args); });
             };
         }
-    };
-    UpgradeModule.decorators = [
-        { type: NgModule, args: [{ providers: angular1Providers },] },
-    ];
-    /** @nocollapse */
-    UpgradeModule.ctorParameters = function () { return [
-        { type: Injector, },
-        { type: NgZone, },
-    ]; };
-    return UpgradeModule;
-}());
+    }
+}
+UpgradeModule.decorators = [
+    { type: NgModule, args: [{ providers: angular1Providers },] },
+];
+/** @nocollapse */
+UpgradeModule.ctorParameters = () => [
+    { type: Injector, },
+    { type: NgZone, },
+];
 function UpgradeModule_tsickle_Closure_declarations() {
     /** @type {?} */
     UpgradeModule.decorators;

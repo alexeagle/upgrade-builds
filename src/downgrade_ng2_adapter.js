@@ -7,12 +7,11 @@
  */
 import { ReflectiveInjector } from '@angular/core/index';
 import { NG1_SCOPE } from './constants';
-var /** @type {?} */ INITIAL_VALUE = {
+const /** @type {?} */ INITIAL_VALUE = {
     __UNINITIALIZED__: true
 };
-export var DowngradeNg2ComponentAdapter = (function () {
+export class DowngradeNg2ComponentAdapter {
     /**
-     * @param {?} id
      * @param {?} info
      * @param {?} element
      * @param {?} attrs
@@ -21,8 +20,7 @@ export var DowngradeNg2ComponentAdapter = (function () {
      * @param {?} parse
      * @param {?} componentFactory
      */
-    function DowngradeNg2ComponentAdapter(id, info, element, attrs, scope, parentInjector, parse, componentFactory) {
-        this.id = id;
+    constructor(info, element, attrs, scope, parentInjector, parse, componentFactory) {
         this.info = info;
         this.element = element;
         this.attrs = attrs;
@@ -35,42 +33,39 @@ export var DowngradeNg2ComponentAdapter = (function () {
         this.inputChanges = null;
         this.componentRef = null;
         this.changeDetector = null;
-        this.contentInsertionPoint = null;
-        this.element[0].id = id;
         this.componentScope = scope.$new();
-        this.childNodes = element.contents();
+    }
+    /**
+     * @param {?} projectableNodes
+     * @return {?}
+     */
+    bootstrapNg2(projectableNodes) {
+        const /** @type {?} */ childInjector = ReflectiveInjector.resolveAndCreate([{ provide: NG1_SCOPE, useValue: this.componentScope }], this.parentInjector);
+        this.componentRef =
+            this.componentFactory.create(childInjector, projectableNodes, this.element[0]);
+        this.changeDetector = this.componentRef.changeDetectorRef;
+        this.component = this.componentRef.instance;
     }
     /**
      * @return {?}
      */
-    DowngradeNg2ComponentAdapter.prototype.bootstrapNg2 = function () {
-        var /** @type {?} */ childInjector = ReflectiveInjector.resolveAndCreate([{ provide: NG1_SCOPE, useValue: this.componentScope }], this.parentInjector);
-        this.contentInsertionPoint = document.createComment('ng1 insertion point');
-        this.componentRef = this.componentFactory.create(childInjector, [[this.contentInsertionPoint]], this.element[0]);
-        this.changeDetector = this.componentRef.changeDetectorRef;
-        this.component = this.componentRef.instance;
-    };
-    /**
-     * @return {?}
-     */
-    DowngradeNg2ComponentAdapter.prototype.setupInputs = function () {
-        var _this = this;
-        var /** @type {?} */ attrs = this.attrs;
-        var /** @type {?} */ inputs = this.info.inputs || [];
-        for (var /** @type {?} */ i = 0; i < inputs.length; i++) {
-            var /** @type {?} */ input = inputs[i];
-            var /** @type {?} */ expr = null;
+    setupInputs() {
+        const /** @type {?} */ attrs = this.attrs;
+        const /** @type {?} */ inputs = this.info.inputs || [];
+        for (let /** @type {?} */ i = 0; i < inputs.length; i++) {
+            const /** @type {?} */ input = inputs[i];
+            let /** @type {?} */ expr = null;
             if (attrs.hasOwnProperty(input.attr)) {
-                var /** @type {?} */ observeFn = (function (prop /** TODO #9100 */) {
-                    var /** @type {?} */ prevValue = INITIAL_VALUE;
-                    return function (value /** TODO #9100 */) {
-                        if (_this.inputChanges !== null) {
-                            _this.inputChangeCount++;
-                            _this.inputChanges[prop] =
+                const /** @type {?} */ observeFn = ((prop /** TODO #9100 */) => {
+                    let /** @type {?} */ prevValue = INITIAL_VALUE;
+                    return (value /** TODO #9100 */) => {
+                        if (this.inputChanges !== null) {
+                            this.inputChangeCount++;
+                            this.inputChanges[prop] =
                                 new Ng1Change(value, prevValue === INITIAL_VALUE ? value : prevValue);
                             prevValue = value;
                         }
-                        _this.component[prop] = value;
+                        this.component[prop] = value;
                     };
                 })(input.prop);
                 attrs.$observe(input.attr, observeFn);
@@ -88,56 +83,41 @@ export var DowngradeNg2ComponentAdapter = (function () {
                 expr = ((attrs) /** TODO #9100 */)[input.bracketParenAttr];
             }
             if (expr != null) {
-                var /** @type {?} */ watchFn = (function (prop /** TODO #9100 */) {
-                    return function (value /** TODO #9100 */, prevValue /** TODO #9100 */) {
-                        if (_this.inputChanges != null) {
-                            _this.inputChangeCount++;
-                            _this.inputChanges[prop] = new Ng1Change(prevValue, value);
-                        }
-                        _this.component[prop] = value;
-                    };
+                const /** @type {?} */ watchFn = ((prop /** TODO #9100 */) => (value /** TODO #9100 */, prevValue /** TODO #9100 */) => {
+                    if (this.inputChanges != null) {
+                        this.inputChangeCount++;
+                        this.inputChanges[prop] = new Ng1Change(prevValue, value);
+                    }
+                    this.component[prop] = value;
                 })(input.prop);
                 this.componentScope.$watch(expr, watchFn);
             }
         }
-        var /** @type {?} */ prototype = this.info.type.prototype;
+        const /** @type {?} */ prototype = this.info.type.prototype;
         if (prototype && ((prototype)).ngOnChanges) {
             // Detect: OnChanges interface
             this.inputChanges = {};
-            this.componentScope.$watch(function () { return _this.inputChangeCount; }, function () {
-                var /** @type {?} */ inputChanges = _this.inputChanges;
-                _this.inputChanges = {};
-                ((_this.component)).ngOnChanges(inputChanges);
+            this.componentScope.$watch(() => this.inputChangeCount, () => {
+                const /** @type {?} */ inputChanges = this.inputChanges;
+                this.inputChanges = {};
+                ((this.component)).ngOnChanges(inputChanges);
             });
         }
-        this.componentScope.$watch(function () { return _this.changeDetector && _this.changeDetector.detectChanges(); });
-    };
+        this.componentScope.$watch(() => this.changeDetector && this.changeDetector.detectChanges());
+    }
     /**
      * @return {?}
      */
-    DowngradeNg2ComponentAdapter.prototype.projectContent = function () {
-        var /** @type {?} */ childNodes = this.childNodes;
-        var /** @type {?} */ parent = this.contentInsertionPoint.parentNode;
-        if (parent) {
-            for (var /** @type {?} */ i = 0, /** @type {?} */ ii = childNodes.length; i < ii; i++) {
-                parent.insertBefore(childNodes[i], this.contentInsertionPoint);
-            }
-        }
-    };
-    /**
-     * @return {?}
-     */
-    DowngradeNg2ComponentAdapter.prototype.setupOutputs = function () {
-        var _this = this;
-        var /** @type {?} */ attrs = this.attrs;
-        var /** @type {?} */ outputs = this.info.outputs || [];
-        for (var /** @type {?} */ j = 0; j < outputs.length; j++) {
-            var /** @type {?} */ output = outputs[j];
-            var /** @type {?} */ expr = null;
-            var /** @type {?} */ assignExpr = false;
-            var /** @type {?} */ bindonAttr = output.bindonAttr ? output.bindonAttr.substring(0, output.bindonAttr.length - 6) : null;
-            var /** @type {?} */ bracketParenAttr = output.bracketParenAttr ?
-                "[(" + output.bracketParenAttr.substring(2, output.bracketParenAttr.length - 8) + ")]" :
+    setupOutputs() {
+        const /** @type {?} */ attrs = this.attrs;
+        const /** @type {?} */ outputs = this.info.outputs || [];
+        for (let /** @type {?} */ j = 0; j < outputs.length; j++) {
+            const /** @type {?} */ output = outputs[j];
+            let /** @type {?} */ expr = null;
+            let /** @type {?} */ assignExpr = false;
+            const /** @type {?} */ bindonAttr = output.bindonAttr ? output.bindonAttr.substring(0, output.bindonAttr.length - 6) : null;
+            const /** @type {?} */ bracketParenAttr = output.bracketParenAttr ?
+                `[(${output.bracketParenAttr.substring(2, output.bracketParenAttr.length - 8)})]` :
                 null;
             if (attrs.hasOwnProperty(output.onAttr)) {
                 expr = ((attrs) /** TODO #9100 */)[output.onAttr];
@@ -154,39 +134,35 @@ export var DowngradeNg2ComponentAdapter = (function () {
                 assignExpr = true;
             }
             if (expr != null && assignExpr != null) {
-                var /** @type {?} */ getter = this.parse(expr);
-                var /** @type {?} */ setter = getter.assign;
+                const /** @type {?} */ getter = this.parse(expr);
+                const /** @type {?} */ setter = getter.assign;
                 if (assignExpr && !setter) {
-                    throw new Error("Expression '" + expr + "' is not assignable!");
+                    throw new Error(`Expression '${expr}' is not assignable!`);
                 }
-                var /** @type {?} */ emitter = (this.component[output.prop]);
+                const /** @type {?} */ emitter = (this.component[output.prop]);
                 if (emitter) {
                     emitter.subscribe({
                         next: assignExpr ?
-                            (function (setter) { return function (v /** TODO #9100 */) { return setter(_this.scope, v); }; })(setter) :
-                            (function (getter) { return function (v /** TODO #9100 */) {
-                                return getter(_this.scope, { $event: v });
-                            }; })(getter)
+                            ((setter) => (v /** TODO #9100 */) => setter(this.scope, v))(setter) :
+                            ((getter) => (v /** TODO #9100 */) => getter(this.scope, { $event: v }))(getter)
                     });
                 }
                 else {
-                    throw new Error("Missing emitter '" + output.prop + "' on component '" + this.info.selector + "'!");
+                    throw new Error(`Missing emitter '${output.prop}' on component '${this.info.selector}'!`);
                 }
             }
         }
-    };
+    }
     /**
      * @return {?}
      */
-    DowngradeNg2ComponentAdapter.prototype.registerCleanup = function () {
-        var _this = this;
-        this.element.bind('$destroy', function () {
-            _this.componentScope.$destroy();
-            _this.componentRef.destroy();
+    registerCleanup() {
+        this.element.bind('$destroy', () => {
+            this.componentScope.$destroy();
+            this.componentRef.destroy();
         });
-    };
-    return DowngradeNg2ComponentAdapter;
-}());
+    }
+}
 function DowngradeNg2ComponentAdapter_tsickle_Closure_declarations() {
     /** @type {?} */
     DowngradeNg2ComponentAdapter.prototype.component;
@@ -200,12 +176,6 @@ function DowngradeNg2ComponentAdapter_tsickle_Closure_declarations() {
     DowngradeNg2ComponentAdapter.prototype.changeDetector;
     /** @type {?} */
     DowngradeNg2ComponentAdapter.prototype.componentScope;
-    /** @type {?} */
-    DowngradeNg2ComponentAdapter.prototype.childNodes;
-    /** @type {?} */
-    DowngradeNg2ComponentAdapter.prototype.contentInsertionPoint;
-    /** @type {?} */
-    DowngradeNg2ComponentAdapter.prototype.id;
     /** @type {?} */
     DowngradeNg2ComponentAdapter.prototype.info;
     /** @type {?} */
@@ -221,21 +191,20 @@ function DowngradeNg2ComponentAdapter_tsickle_Closure_declarations() {
     /** @type {?} */
     DowngradeNg2ComponentAdapter.prototype.componentFactory;
 }
-var Ng1Change = (function () {
+class Ng1Change {
     /**
      * @param {?} previousValue
      * @param {?} currentValue
      */
-    function Ng1Change(previousValue, currentValue) {
+    constructor(previousValue, currentValue) {
         this.previousValue = previousValue;
         this.currentValue = currentValue;
     }
     /**
      * @return {?}
      */
-    Ng1Change.prototype.isFirstChange = function () { return this.previousValue === this.currentValue; };
-    return Ng1Change;
-}());
+    isFirstChange() { return this.previousValue === this.currentValue; }
+}
 function Ng1Change_tsickle_Closure_declarations() {
     /** @type {?} */
     Ng1Change.prototype.previousValue;
