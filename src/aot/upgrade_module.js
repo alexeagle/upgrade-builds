@@ -11,6 +11,7 @@ import { controllerKey } from '../util';
 import { angular1Providers, setTempInjectorRef } from './angular1_providers';
 import { $$TESTABILITY, $DELEGATE, $INJECTOR, $PROVIDE, INJECTOR_KEY, UPGRADE_MODULE_NAME } from './constants';
 /**
+ * \@whatItDoes
  *
  * *Part of the [upgrade/static](/docs/ts/latest/api/#!?query=upgrade%2Fstatic)
  * library for hybrid upgrade apps that support AoT compilation*
@@ -67,6 +68,7 @@ import { $$TESTABILITY, $DELEGATE, $INJECTOR, $PROVIDE, INJECTOR_KEY, UPGRADE_MO
  * to
  *    `$apply()`.
  *
+ * \@howToUse
  *
  * `import {UpgradeModule} from '\@angular/upgrade/static';`
  *
@@ -101,6 +103,7 @@ import { $$TESTABILITY, $DELEGATE, $INJECTOR, $PROVIDE, INJECTOR_KEY, UPGRADE_MO
  *
  * {\@example upgrade/static/ts/module.ts region="use-ng1-upgraded-service"}
  *
+ * \@description
  *
  * This class is an `NgModule`, which you import to provide Angular 1 core services,
  * and has an instance method used to bootstrap the hybrid upgrade application.
@@ -118,6 +121,7 @@ import { $$TESTABILITY, $DELEGATE, $INJECTOR, $PROVIDE, INJECTOR_KEY, UPGRADE_MO
  * bootstrap {\@link NgZone} and the
  * [Angular 1 $injector](https://docs.angularjs.org/api/auto/service/$injector).
  *
+ * \@experimental
  */
 export class UpgradeModule {
     /**

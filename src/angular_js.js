@@ -5,7 +5,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-;
 /**
  * @return {?}
  */
@@ -27,10 +26,10 @@ try {
 }
 catch (e) {
 }
-export var /** @type {?} */ bootstrap = angular.bootstrap;
-export var /** @type {?} */ module = angular.module;
-export var /** @type {?} */ element = angular.element;
-export var /** @type {?} */ version = angular.version;
-export var /** @type {?} */ resumeBootstrap = angular.resumeBootstrap;
-export var /** @type {?} */ getTestability = angular.getTestability;
+export const /** @type {?} */ bootstrap = angular.bootstrap;
+export const /** @type {?} */ module = angular.module;
+export const /** @type {?} */ element = angular.element;
+export const /** @type {?} */ version = angular.version;
+export const /** @type {?} */ resumeBootstrap = angular.resumeBootstrap;
+export const /** @type {?} */ getTestability = angular.getTestability;
 //# sourceMappingURL=angular_js.js.map

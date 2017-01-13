@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { ReflectiveInjector } from '@angular/core/index';
+import { ReflectiveInjector, SimpleChange } from '@angular/core/index';
 import { NG1_SCOPE } from './constants';
 const /** @type {?} */ INITIAL_VALUE = {
     __UNINITIALIZED__: true
@@ -61,8 +61,7 @@ export class DowngradeNg2ComponentAdapter {
                     return (value /** TODO #9100 */) => {
                         if (this.inputChanges !== null) {
                             this.inputChangeCount++;
-                            this.inputChanges[prop] =
-                                new Ng1Change(value, prevValue === INITIAL_VALUE ? value : prevValue);
+                            this.inputChanges[prop] = new SimpleChange(value, prevValue === INITIAL_VALUE ? value : prevValue, prevValue === INITIAL_VALUE);
                             prevValue = value;
                         }
                         this.component[prop] = value;
@@ -86,7 +85,7 @@ export class DowngradeNg2ComponentAdapter {
                 const /** @type {?} */ watchFn = ((prop /** TODO #9100 */) => (value /** TODO #9100 */, prevValue /** TODO #9100 */) => {
                     if (this.inputChanges != null) {
                         this.inputChangeCount++;
-                        this.inputChanges[prop] = new Ng1Change(prevValue, value);
+                        this.inputChanges[prop] = new SimpleChange(prevValue, value, prevValue === value);
                     }
                     this.component[prop] = value;
                 })(input.prop);
@@ -190,25 +189,5 @@ function DowngradeNg2ComponentAdapter_tsickle_Closure_declarations() {
     DowngradeNg2ComponentAdapter.prototype.parse;
     /** @type {?} */
     DowngradeNg2ComponentAdapter.prototype.componentFactory;
-}
-class Ng1Change {
-    /**
-     * @param {?} previousValue
-     * @param {?} currentValue
-     */
-    constructor(previousValue, currentValue) {
-        this.previousValue = previousValue;
-        this.currentValue = currentValue;
-    }
-    /**
-     * @return {?}
-     */
-    isFirstChange() { return this.previousValue === this.currentValue; }
-}
-function Ng1Change_tsickle_Closure_declarations() {
-    /** @type {?} */
-    Ng1Change.prototype.previousValue;
-    /** @type {?} */
-    Ng1Change.prototype.currentValue;
 }
 //# sourceMappingURL=downgrade_ng2_adapter.js.map

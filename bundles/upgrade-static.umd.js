@@ -127,8 +127,7 @@
                         return function (value /** TODO #9100 */) {
                             if (_this.inputChanges !== null) {
                                 _this.inputChangeCount++;
-                                _this.inputChanges[prop] =
-                                    new Ng1Change(value, prevValue === INITIAL_VALUE ? value : prevValue);
+                                _this.inputChanges[prop] = new _angular_core.SimpleChange(value, prevValue === INITIAL_VALUE ? value : prevValue, prevValue === INITIAL_VALUE);
                                 prevValue = value;
                             }
                             _this.component[prop] = value;
@@ -149,15 +148,13 @@
                     expr = ((attrs) /** TODO #9100 */)[input.bracketParenAttr];
                 }
                 if (expr != null) {
-                    var /** @type {?} */ watchFn = (function (prop /** TODO #9100 */) {
-                        return function (value /** TODO #9100 */, prevValue /** TODO #9100 */) {
-                            if (_this.inputChanges != null) {
-                                _this.inputChangeCount++;
-                                _this.inputChanges[prop] = new Ng1Change(prevValue, value);
-                            }
-                            _this.component[prop] = value;
-                        };
-                    })(input.prop);
+                    var /** @type {?} */ watchFn = (function (prop /** TODO #9100 */) { return function (value /** TODO #9100 */, prevValue /** TODO #9100 */) {
+                        if (_this.inputChanges != null) {
+                            _this.inputChangeCount++;
+                            _this.inputChanges[prop] = new _angular_core.SimpleChange(prevValue, value, prevValue === value);
+                        }
+                        _this.component[prop] = value;
+                    }; })(input.prop);
                     this.componentScope.$watch(expr, watchFn);
                 }
             }
@@ -248,30 +245,17 @@
         };
         return DowngradeComponentAdapter;
     }());
-    var Ng1Change = (function () {
-        /**
-         * @param {?} previousValue
-         * @param {?} currentValue
-         */
-        function Ng1Change(previousValue, currentValue) {
-            this.previousValue = previousValue;
-            this.currentValue = currentValue;
-        }
-        /**
-         * @return {?}
-         */
-        Ng1Change.prototype.isFirstChange = function () { return this.previousValue === this.currentValue; };
-        return Ng1Change;
-    }());
 
     var /** @type {?} */ downgradeCount = 0;
     /**
+     * \@whatItDoes
      *
      * *Part of the [upgrade/static](/docs/ts/latest/api/#!?query=upgrade%2Fstatic)
      * library for hybrid upgrade apps that support AoT compilation*
      *
      * Allows an Angular 2+ component to be used from Angular 1.
      *
+     * \@howToUse
      *
      * Let's assume that you have an Angular 2+ component called `ng2Heroes` that needs
      * to be made available in Angular 1 templates.
@@ -293,6 +277,7 @@
      * * specify the Angular 2+ component class that is to be downgraded
      * * specify all inputs and outputs that the Angular 1 component expects
      *
+     * \@description
      *
      * A helper function that returns a factory function to be used for registering an
      * Angular 1 wrapper directive for "downgrading" an Angular 2+ component.
@@ -307,6 +292,7 @@
      * attribute names. They are of the form `"prop: attr"`; or simply `"propAndAttr" where the
      * property and attribute have the same identifier.
      *
+     * \@experimental
      * @param {?} info
      * @return {?}
      */
@@ -340,12 +326,14 @@
     }
 
     /**
+     * \@whatItDoes
      *
      * *Part of the [upgrade/static](/docs/ts/latest/api/#!?query=upgrade%2Fstatic)
      * library for hybrid upgrade apps that support AoT compilation*
      *
      * Allow an Angular 2+ service to be accessible from Angular 1.
      *
+     * \@howToUse
      *
      * First ensure that the service to be downgraded is provided in an {\@link NgModule}
      * that will be part of the upgrade application. For example, let's assume we have
@@ -367,6 +355,7 @@
      *
      * {\@example upgrade/static/ts/module.ts region="example-app"}
      *
+     * \@description
      *
      * Takes a `token` that identifies a service provided from Angular 2+.
      *
@@ -376,6 +365,7 @@
      * The factory function provides access to the Angular 2+ service that
      * is identified by the `token` parameter.
      *
+     * \@experimental
      * @param {?} token
      * @return {?}
      */
@@ -390,7 +380,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    ;
     /**
      * @return {?}
      */
@@ -448,12 +437,14 @@
         return Bindings;
     }());
     /**
+     * \@whatItDoes
      *
      * *Part of the [upgrade/static](/docs/ts/latest/api/#!?query=upgrade%2Fstatic)
      * library for hybrid upgrade apps that support AoT compilation*
      *
      * Allows an Angular 1 component to be used from Angular 2+.
      *
+     * \@howToUse
      *
      * Let's assume that you have an Angular 1 component called `ng1Hero` that needs
      * to be made available in Angular 2+ templates.
@@ -478,10 +469,12 @@
      *   * the Angular 1 name of the component (`ng1Hero`)
      *   * the {\@link ElementRef} and {\@link Injector} for the component wrapper
      *
+     * \@description
      *
      * A helper class that should be used as a base class for creating Angular directives
      * that wrap Angular 1 components that need to be "upgraded".
      *
+     * \@experimental
      */
     var UpgradeComponent = (function () {
         /**
@@ -552,6 +545,11 @@
                 });
             }
             this.callLifecycleHook('$onInit', this.controllerInstance);
+            if (this.controllerInstance && isFunction(this.controllerInstance.$doCheck)) {
+                var /** @type {?} */ callDoCheck = function () { return _this.callLifecycleHook('$doCheck', _this.controllerInstance); };
+                this.$componentScope.$parent.$watch(callDoCheck);
+                callDoCheck();
+            }
             var /** @type {?} */ link = this.directive.link;
             var /** @type {?} */ preLink = (typeof link == 'object') && ((link)).pre;
             var /** @type {?} */ postLink = (typeof link == 'object') ? ((link)).post : link;
@@ -615,7 +613,7 @@
          * @return {?}
          */
         UpgradeComponent.prototype.callLifecycleHook = function (method, context, arg) {
-            if (context && typeof context[method] === 'function') {
+            if (context && isFunction(context[method])) {
                 context[method](arg);
             }
         };
@@ -820,7 +818,14 @@
      * @return {?}
      */
     function getOrCall(property) {
-        return typeof (property) === 'function' ? property() : property;
+        return isFunction(property) ? property() : property;
+    }
+    /**
+     * @param {?} value
+     * @return {?}
+     */
+    function isFunction(value) {
+        return typeof value === 'function';
     }
     /**
      * @param {?} value
@@ -890,6 +895,7 @@
     ];
 
     /**
+     * \@whatItDoes
      *
      * *Part of the [upgrade/static](/docs/ts/latest/api/#!?query=upgrade%2Fstatic)
      * library for hybrid upgrade apps that support AoT compilation*
@@ -946,6 +952,7 @@
      * to
      *    `$apply()`.
      *
+     * \@howToUse
      *
      * `import {UpgradeModule} from '\@angular/upgrade/static';`
      *
@@ -980,6 +987,7 @@
      *
      * {\@example upgrade/static/ts/module.ts region="use-ng1-upgraded-service"}
      *
+     * \@description
      *
      * This class is an `NgModule`, which you import to provide Angular 1 core services,
      * and has an instance method used to bootstrap the hybrid upgrade application.
@@ -997,6 +1005,7 @@
      * bootstrap {\@link NgZone} and the
      * [Angular 1 $injector](https://docs.angularjs.org/api/auto/service/$injector).
      *
+     * \@experimental
      */
     var UpgradeModule = (function () {
         /**

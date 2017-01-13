@@ -16,7 +16,6 @@
      * Use of this source code is governed by an MIT-style license that can be
      * found in the LICENSE file at https://angular.io/license
      */
-    ;
     /**
      * @return {?}
      */
@@ -119,8 +118,7 @@
                         return function (value /** TODO #9100 */) {
                             if (_this.inputChanges !== null) {
                                 _this.inputChangeCount++;
-                                _this.inputChanges[prop] =
-                                    new Ng1Change(value, prevValue === INITIAL_VALUE ? value : prevValue);
+                                _this.inputChanges[prop] = new _angular_core.SimpleChange(value, prevValue === INITIAL_VALUE ? value : prevValue, prevValue === INITIAL_VALUE);
                                 prevValue = value;
                             }
                             _this.component[prop] = value;
@@ -141,15 +139,13 @@
                     expr = ((attrs) /** TODO #9100 */)[input.bracketParenAttr];
                 }
                 if (expr != null) {
-                    var /** @type {?} */ watchFn = (function (prop /** TODO #9100 */) {
-                        return function (value /** TODO #9100 */, prevValue /** TODO #9100 */) {
-                            if (_this.inputChanges != null) {
-                                _this.inputChangeCount++;
-                                _this.inputChanges[prop] = new Ng1Change(prevValue, value);
-                            }
-                            _this.component[prop] = value;
-                        };
-                    })(input.prop);
+                    var /** @type {?} */ watchFn = (function (prop /** TODO #9100 */) { return function (value /** TODO #9100 */, prevValue /** TODO #9100 */) {
+                        if (_this.inputChanges != null) {
+                            _this.inputChangeCount++;
+                            _this.inputChanges[prop] = new _angular_core.SimpleChange(prevValue, value, prevValue === value);
+                        }
+                        _this.component[prop] = value;
+                    }; })(input.prop);
                     this.componentScope.$watch(expr, watchFn);
                 }
             }
@@ -228,21 +224,6 @@
         };
         return DowngradeNg2ComponentAdapter;
     }());
-    var Ng1Change = (function () {
-        /**
-         * @param {?} previousValue
-         * @param {?} currentValue
-         */
-        function Ng1Change(previousValue, currentValue) {
-            this.previousValue = previousValue;
-            this.currentValue = currentValue;
-        }
-        /**
-         * @return {?}
-         */
-        Ng1Change.prototype.isFirstChange = function () { return this.previousValue === this.currentValue; };
-        return Ng1Change;
-    }());
 
     var /** @type {?} */ COMPONENT_SELECTOR = /^[\w|-]*$/;
     var /** @type {?} */ SKEWER_CASE = /-(\w)/g;
@@ -293,7 +274,7 @@
     }
 
     /**
-     * @license undefined
+     * @license
      * Copyright Google Inc. All Rights Reserved.
      *
      * Use of this source code is governed by an MIT-style license that can be
@@ -474,11 +455,11 @@
         UpgradeNg1ComponentAdapterBuilder.prototype.compileTemplate = function (compile, templateCache, httpBackend) {
             var _this = this;
             if (this.directive.template !== undefined) {
-                this.linkFn = compileHtml(typeof this.directive.template === 'function' ? this.directive.template() :
+                this.linkFn = compileHtml(isFunction(this.directive.template) ? this.directive.template() :
                     this.directive.template);
             }
             else if (this.directive.templateUrl) {
-                var /** @type {?} */ url_1 = typeof this.directive.templateUrl === 'function' ? this.directive.templateUrl() :
+                var /** @type {?} */ url_1 = isFunction(this.directive.templateUrl) ? this.directive.templateUrl() :
                     this.directive.templateUrl;
                 var /** @type {?} */ html = templateCache.get(url_1);
                 if (html !== undefined) {
@@ -560,6 +541,7 @@
             this.propOuts = propOuts;
             this.checkProperties = checkProperties;
             this.propertyMap = propertyMap;
+            this.controllerInstance = null;
             this.destinationObj = null;
             this.checkLastValues = [];
             this.$element = null;
@@ -568,7 +550,8 @@
             this.$element = element(this.element);
             var controllerType = directive.controller;
             if (directive.bindToController && controllerType) {
-                this.destinationObj = this.buildController(controllerType);
+                this.controllerInstance = this.buildController(controllerType);
+                this.destinationObj = this.controllerInstance;
             }
             else {
                 this.destinationObj = this.componentScope;
@@ -593,7 +576,10 @@
         UpgradeNg1ComponentAdapter.prototype.ngOnInit = function () {
             var _this = this;
             if (!this.directive.bindToController && this.directive.controller) {
-                this.buildController(this.directive.controller);
+                this.controllerInstance = this.buildController(this.directive.controller);
+            }
+            if (this.controllerInstance && isFunction(this.controllerInstance.$onInit)) {
+                this.controllerInstance.$onInit();
             }
             var /** @type {?} */ link = this.directive.link;
             if (typeof link == 'object')
@@ -617,8 +603,8 @@
             }, {
                 parentBoundTranscludeFn: function (scope /** TODO #9100 */, cloneAttach /** TODO #9100 */) { cloneAttach(childNodes); }
             });
-            if (this.destinationObj.$onInit) {
-                this.destinationObj.$onInit();
+            if (this.controllerInstance && isFunction(this.controllerInstance.$postLink)) {
+                this.controllerInstance.$postLink();
             }
         };
         /**
@@ -633,7 +619,7 @@
                 _this.setComponentProperty(name, change.currentValue);
                 ng1Changes[_this.propertyMap[name]] = change;
             });
-            if (this.destinationObj.$onChanges) {
+            if (isFunction(this.destinationObj.$onChanges)) {
                 this.destinationObj.$onChanges(ng1Changes);
             }
         };
@@ -656,16 +642,16 @@
                     }
                 }
             }
-            if (this.destinationObj.$doCheck && this.directive.controller) {
-                this.destinationObj.$doCheck();
+            if (this.controllerInstance && isFunction(this.controllerInstance.$doCheck)) {
+                this.controllerInstance.$doCheck();
             }
         };
         /**
          * @return {?}
          */
         UpgradeNg1ComponentAdapter.prototype.ngOnDestroy = function () {
-            if (this.destinationObj.$onDestroy && this.directive.controller) {
-                this.destinationObj.$onDestroy();
+            if (this.controllerInstance && isFunction(this.controllerInstance.$onDestroy)) {
+                this.controllerInstance.$onDestroy();
             }
         };
         /**
@@ -732,6 +718,13 @@
         };
         return UpgradeNg1ComponentAdapter;
     }());
+    /**
+     * @param {?} value
+     * @return {?}
+     */
+    function isFunction(value) {
+        return typeof value === 'function';
+    }
 
     var /** @type {?} */ upgradeCount = 0;
     /**
@@ -786,6 +779,7 @@
      * });
      *
      *
+     * \@Component({
      *   selector: 'ng2-comp',
      *   inputs: ['name'],
      *   template: 'ng2[<ng1-hello [title]="name">transclude</ng1-hello>](<ng-content></ng-content>)',
@@ -794,6 +788,7 @@
      * class Ng2Component {
      * }
      *
+     * \@NgModule({
      *   declarations: [Ng2Component, adapter.upgradeNg1Component('ng1Hello')],
      *   imports: [BrowserModule]
      * })
@@ -809,6 +804,7 @@
      *
      * ```
      *
+     * \@stable
      */
     var UpgradeAdapter = (function () {
         /**
@@ -859,6 +855,7 @@
          * const module = angular.module('myExample', []);
          * module.directive('greet', adapter.downgradeNg2Component(Greeter));
          *
+         * \@Component({
          *   selector: 'greet',
          *   template: '{{salutation}} {{name}}! - <ng-content></ng-content>'
          * })
@@ -867,6 +864,7 @@
          *   \@Input() name: string;
          * }
          *
+         * \@NgModule({
          *   declarations: [Greeter],
          *   imports: [BrowserModule]
          * })
@@ -914,12 +912,12 @@
          *   - `compile`: not supported because the host element is owned by Angular 2+, which does
          *     not allow modifying DOM structure during compilation.
          *   - `controller`: supported. (NOTE: injection of `$attrs` and `$transclude` is not supported.)
-         *   - `controllerAs': supported.
-         *   - `bindToController': supported.
-         *   - `link': supported. (NOTE: only pre-link function is supported.)
-         *   - `name': supported.
-         *   - `priority': ignored.
-         *   - `replace': not supported.
+         *   - `controllerAs`: supported.
+         *   - `bindToController`: supported.
+         *   - `link`: supported. (NOTE: only pre-link function is supported.)
+         *   - `name`: supported.
+         *   - `priority`: ignored.
+         *   - `replace`: not supported.
          *   - `require`: supported.
          *   - `restrict`: must be set to 'E'.
          *   - `scope`: supported.
@@ -944,12 +942,14 @@
          *
          * module.directive('ng2', adapter.downgradeNg2Component(Ng2Component));
          *
+         * \@Component({
          *   selector: 'ng2',
          *   template: 'ng2 template: <greet salutation="Hello" [name]="world">text</greet>'
          * })
          * class Ng2Component {
          * }
          *
+         * \@NgModule({
          *   declarations: [Ng2Component, adapter.upgradeNg1Component('greet')],
          *   imports: [BrowserModule]
          * })
@@ -1023,7 +1023,7 @@
             this.declareNg1Module(modules);
             windowNgMock.module(this.ng1Module.name);
             var /** @type {?} */ upgrade = new UpgradeAdapterRef();
-            this.ng2BootstrapDeferred.promise.then(function () { ((upgrade))._bootstrapDone(_this.moduleRef, upgrade.ng1Injector); }, onError);
+            this.ng2BootstrapDeferred.promise.then(function (ng1Injector) { ((upgrade))._bootstrapDone(_this.moduleRef, ng1Injector); }, onError);
             return upgrade;
         };
         /**
@@ -1048,6 +1048,7 @@
          * });
          *
          *
+         * \@Component({
          *   selector: 'ng2',
          *   inputs: ['name'],
          *   template: 'ng2[<ng1 [title]="name">transclude</ng1>](<ng-content></ng-content>)'
@@ -1055,6 +1056,7 @@
          * class Ng2 {
          * }
          *
+         * \@NgModule({
          *   declarations: [Ng2, adapter.upgradeNg1Component('ng1')],
          *   imports: [BrowserModule]
          * })
@@ -1110,6 +1112,7 @@
          * class Login { ... }
          * class Server { ... }
          *
+         * \@Injectable()
          * class Example {
          *   constructor(\@Inject('server') server, login: Login) {
          *     ...
@@ -1426,6 +1429,7 @@
     /**
      * Use `UpgradeAdapterRef` to control a hybrid Angular 1 / Angular 2+ application.
      *
+     * \@stable
      */
     var UpgradeAdapterRef = (function () {
         function UpgradeAdapterRef() {

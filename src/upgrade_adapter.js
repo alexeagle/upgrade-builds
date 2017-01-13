@@ -67,6 +67,7 @@ let /** @type {?} */ upgradeCount = 0;
  * });
  *
  *
+ * \@Component({
  *   selector: 'ng2-comp',
  *   inputs: ['name'],
  *   template: 'ng2[<ng1-hello [title]="name">transclude</ng1-hello>](<ng-content></ng-content>)',
@@ -75,6 +76,7 @@ let /** @type {?} */ upgradeCount = 0;
  * class Ng2Component {
  * }
  *
+ * \@NgModule({
  *   declarations: [Ng2Component, adapter.upgradeNg1Component('ng1Hello')],
  *   imports: [BrowserModule]
  * })
@@ -90,6 +92,7 @@ let /** @type {?} */ upgradeCount = 0;
  *
  * ```
  *
+ * \@stable
  */
 export class UpgradeAdapter {
     /**
@@ -140,6 +143,7 @@ export class UpgradeAdapter {
      * const module = angular.module('myExample', []);
      * module.directive('greet', adapter.downgradeNg2Component(Greeter));
      *
+     * \@Component({
      *   selector: 'greet',
      *   template: '{{salutation}} {{name}}! - <ng-content></ng-content>'
      * })
@@ -148,6 +152,7 @@ export class UpgradeAdapter {
      *   \@Input() name: string;
      * }
      *
+     * \@NgModule({
      *   declarations: [Greeter],
      *   imports: [BrowserModule]
      * })
@@ -195,12 +200,12 @@ export class UpgradeAdapter {
      *   - `compile`: not supported because the host element is owned by Angular 2+, which does
      *     not allow modifying DOM structure during compilation.
      *   - `controller`: supported. (NOTE: injection of `$attrs` and `$transclude` is not supported.)
-     *   - `controllerAs': supported.
-     *   - `bindToController': supported.
-     *   - `link': supported. (NOTE: only pre-link function is supported.)
-     *   - `name': supported.
-     *   - `priority': ignored.
-     *   - `replace': not supported.
+     *   - `controllerAs`: supported.
+     *   - `bindToController`: supported.
+     *   - `link`: supported. (NOTE: only pre-link function is supported.)
+     *   - `name`: supported.
+     *   - `priority`: ignored.
+     *   - `replace`: not supported.
      *   - `require`: supported.
      *   - `restrict`: must be set to 'E'.
      *   - `scope`: supported.
@@ -225,12 +230,14 @@ export class UpgradeAdapter {
      *
      * module.directive('ng2', adapter.downgradeNg2Component(Ng2Component));
      *
+     * \@Component({
      *   selector: 'ng2',
      *   template: 'ng2 template: <greet salutation="Hello" [name]="world">text</greet>'
      * })
      * class Ng2Component {
      * }
      *
+     * \@NgModule({
      *   declarations: [Ng2Component, adapter.upgradeNg1Component('greet')],
      *   imports: [BrowserModule]
      * })
@@ -303,7 +310,7 @@ export class UpgradeAdapter {
         this.declareNg1Module(modules);
         windowNgMock.module(this.ng1Module.name);
         const /** @type {?} */ upgrade = new UpgradeAdapterRef();
-        this.ng2BootstrapDeferred.promise.then(() => { ((upgrade))._bootstrapDone(this.moduleRef, upgrade.ng1Injector); }, onError);
+        this.ng2BootstrapDeferred.promise.then((ng1Injector) => { ((upgrade))._bootstrapDone(this.moduleRef, ng1Injector); }, onError);
         return upgrade;
     }
     /**
@@ -328,6 +335,7 @@ export class UpgradeAdapter {
      * });
      *
      *
+     * \@Component({
      *   selector: 'ng2',
      *   inputs: ['name'],
      *   template: 'ng2[<ng1 [title]="name">transclude</ng1>](<ng-content></ng-content>)'
@@ -335,6 +343,7 @@ export class UpgradeAdapter {
      * class Ng2 {
      * }
      *
+     * \@NgModule({
      *   declarations: [Ng2, adapter.upgradeNg1Component('ng1')],
      *   imports: [BrowserModule]
      * })
@@ -388,6 +397,7 @@ export class UpgradeAdapter {
      * class Login { ... }
      * class Server { ... }
      *
+     * \@Injectable()
      * class Example {
      *   constructor(\@Inject('server') server, login: Login) {
      *     ...
@@ -584,6 +594,7 @@ function UpgradeAdapter_tsickle_Closure_declarations() {
      * We can't upgrade until injector is instantiated and we can retrieve the component metadata.
      * For this reason we keep a list of components to upgrade until ng1 injector is bootstrapped.
      *
+     * \@internal
      * @type {?}
      */
     UpgradeAdapter.prototype.ng1ComponentsToBeUpgraded;
@@ -737,6 +748,7 @@ function ng1ComponentDirective(info, idPrefix) {
 /**
  * Use `UpgradeAdapterRef` to control a hybrid Angular 1 / Angular 2+ application.
  *
+ * \@stable
  */
 export class UpgradeAdapterRef {
     constructor() {

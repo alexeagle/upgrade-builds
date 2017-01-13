@@ -34,12 +34,14 @@ function Bindings_tsickle_Closure_declarations() {
     Bindings.prototype.propertyToOutputMap;
 }
 /**
+ * \@whatItDoes
  *
  * *Part of the [upgrade/static](/docs/ts/latest/api/#!?query=upgrade%2Fstatic)
  * library for hybrid upgrade apps that support AoT compilation*
  *
  * Allows an Angular 1 component to be used from Angular 2+.
  *
+ * \@howToUse
  *
  * Let's assume that you have an Angular 1 component called `ng1Hero` that needs
  * to be made available in Angular 2+ templates.
@@ -64,10 +66,12 @@ function Bindings_tsickle_Closure_declarations() {
  *   * the Angular 1 name of the component (`ng1Hero`)
  *   * the {\@link ElementRef} and {\@link Injector} for the component wrapper
  *
+ * \@description
  *
  * A helper class that should be used as a base class for creating Angular directives
  * that wrap Angular 1 components that need to be "upgraded".
  *
+ * \@experimental
  */
 export class UpgradeComponent {
     /**
@@ -137,6 +141,11 @@ export class UpgradeComponent {
             });
         }
         this.callLifecycleHook('$onInit', this.controllerInstance);
+        if (this.controllerInstance && isFunction(this.controllerInstance.$doCheck)) {
+            const /** @type {?} */ callDoCheck = () => this.callLifecycleHook('$doCheck', this.controllerInstance);
+            this.$componentScope.$parent.$watch(callDoCheck);
+            callDoCheck();
+        }
         const /** @type {?} */ link = this.directive.link;
         const /** @type {?} */ preLink = (typeof link == 'object') && ((link)).pre;
         const /** @type {?} */ postLink = (typeof link == 'object') ? ((link)).post : link;
@@ -198,7 +207,7 @@ export class UpgradeComponent {
      * @return {?}
      */
     callLifecycleHook(method, context, arg) {
-        if (context && typeof context[method] === 'function') {
+        if (context && isFunction(context[method])) {
             context[method](arg);
         }
     }
@@ -433,7 +442,14 @@ function UpgradeComponent_tsickle_Closure_declarations() {
  * @return {?}
  */
 function getOrCall(property) {
-    return typeof (property) === 'function' ? property() : property;
+    return isFunction(property) ? property() : property;
+}
+/**
+ * @param {?} value
+ * @return {?}
+ */
+function isFunction(value) {
+    return typeof value === 'function';
 }
 /**
  * @param {?} value

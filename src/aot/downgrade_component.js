@@ -10,12 +10,14 @@ import { $INJECTOR, $PARSE, INJECTOR_KEY } from './constants';
 import { DowngradeComponentAdapter } from './downgrade_component_adapter';
 let /** @type {?} */ downgradeCount = 0;
 /**
+ * \@whatItDoes
  *
  * *Part of the [upgrade/static](/docs/ts/latest/api/#!?query=upgrade%2Fstatic)
  * library for hybrid upgrade apps that support AoT compilation*
  *
  * Allows an Angular 2+ component to be used from Angular 1.
  *
+ * \@howToUse
  *
  * Let's assume that you have an Angular 2+ component called `ng2Heroes` that needs
  * to be made available in Angular 1 templates.
@@ -37,6 +39,7 @@ let /** @type {?} */ downgradeCount = 0;
  * * specify the Angular 2+ component class that is to be downgraded
  * * specify all inputs and outputs that the Angular 1 component expects
  *
+ * \@description
  *
  * A helper function that returns a factory function to be used for registering an
  * Angular 1 wrapper directive for "downgrading" an Angular 2+ component.
@@ -51,6 +54,7 @@ let /** @type {?} */ downgradeCount = 0;
  * attribute names. They are of the form `"prop: attr"`; or simply `"propAndAttr" where the
  * property and attribute have the same identifier.
  *
+ * \@experimental
  * @param {?} info
  * @return {?}
  */

@@ -7,12 +7,14 @@
  */
 import { INJECTOR_KEY } from './constants';
 /**
+ * \@whatItDoes
  *
  * *Part of the [upgrade/static](/docs/ts/latest/api/#!?query=upgrade%2Fstatic)
  * library for hybrid upgrade apps that support AoT compilation*
  *
  * Allow an Angular 2+ service to be accessible from Angular 1.
  *
+ * \@howToUse
  *
  * First ensure that the service to be downgraded is provided in an {\@link NgModule}
  * that will be part of the upgrade application. For example, let's assume we have
@@ -34,6 +36,7 @@ import { INJECTOR_KEY } from './constants';
  *
  * {\@example upgrade/static/ts/module.ts region="example-app"}
  *
+ * \@description
  *
  * Takes a `token` that identifies a service provided from Angular 2+.
  *
@@ -43,6 +46,7 @@ import { INJECTOR_KEY } from './constants';
  * The factory function provides access to the Angular 2+ service that
  * is identified by the `token` parameter.
  *
+ * \@experimental
  * @param {?} token
  * @return {?}
  */
